@@ -6,17 +6,28 @@ import { supabase } from '../lib/supabase'
 type Vehicle = {
   id?: number
   vin: string
+  year: number | null
+  make: string
+  model: string
+  mileage: number | null
   purchase_price: number
   repair_cost: number
+  transport_cost: number
   list_price: number
 }
 
 export default function Home() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
+
   const [vin, setVin] = useState('')
-  const [purchase, setPurchase] = useState('')
+  const [year, setYear] = useState('')
+  const [make, setMake] = useState('')
+  const [model, setModel] = useState('')
+  const [mileage, setMileage] = useState('')
+  const [bidPrice, setBidPrice] = useState('')
+  const [fees, setFees] = useState('')
   const [repairs, setRepairs] = useState('')
-  const [sale, setSale] = useState('')
+  const [averageSellPrice, setAverageSellPrice] = useState('')
 
   async function loadVehicles() {
     const { data, error } = await supabase
@@ -37,14 +48,22 @@ export default function Home() {
   }, [])
 
   async function addVehicle() {
-    if (!vin) return
+    if (!vin || !make || !model) {
+      alert('Please enter at least VIN, make, and model.')
+      return
+    }
 
     const { error } = await supabase.from('vehicles').insert([
       {
         vin,
-        purchase_price: Number(purchase) || 0,
+        year: year ? Number(year) : null,
+        make,
+        model,
+        mileage: mileage ? Number(mileage) : null,
+        purchase_price: Number(bidPrice) || 0,
+        transport_cost: Number(fees) || 0,
         repair_cost: Number(repairs) || 0,
-        list_price: Number(sale) || 0,
+        list_price: Number(averageSellPrice) || 0,
       },
     ])
 
@@ -55,9 +74,15 @@ export default function Home() {
     }
 
     setVin('')
-    setPurchase('')
+    setYear('')
+    setMake('')
+    setModel('')
+    setMileage('')
+    setBidPrice('')
+    setFees('')
     setRepairs('')
-    setSale('')
+    setAverageSellPrice('')
+
     loadVehicles()
   }
 
@@ -67,37 +92,68 @@ export default function Home() {
 
       <h2 style={{ marginTop: '30px' }}>Add Vehicle</h2>
 
-      <input
-        placeholder="VIN"
-        value={vin}
-        onChange={(e) => setVin(e.target.value)}
-      />
-      <br />
-      <br />
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, minmax(220px, 280px))',
+          gap: '12px',
+          marginBottom: '20px',
+        }}
+      >
+        <input
+          placeholder="VIN"
+          value={vin}
+          onChange={(e) => setVin(e.target.value)}
+        />
 
-      <input
-        placeholder="Purchase Price"
-        value={purchase}
-        onChange={(e) => setPurchase(e.target.value)}
-      />
-      <br />
-      <br />
+        <input
+          placeholder="Year"
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+        />
 
-      <input
-        placeholder="Repair Cost"
-        value={repairs}
-        onChange={(e) => setRepairs(e.target.value)}
-      />
-      <br />
-      <br />
+        <input
+          placeholder="Make"
+          value={make}
+          onChange={(e) => setMake(e.target.value)}
+        />
 
-      <input
-        placeholder="Estimated Sale Price"
-        value={sale}
-        onChange={(e) => setSale(e.target.value)}
-      />
-      <br />
-      <br />
+        <input
+          placeholder="Model"
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+        />
+
+        <input
+          placeholder="Mileage"
+          value={mileage}
+          onChange={(e) => setMileage(e.target.value)}
+        />
+
+        <input
+          placeholder="Bid Price"
+          value={bidPrice}
+          onChange={(e) => setBidPrice(e.target.value)}
+        />
+
+        <input
+          placeholder="Fees"
+          value={fees}
+          onChange={(e) => setFees(e.target.value)}
+        />
+
+        <input
+          placeholder="Repair Cost"
+          value={repairs}
+          onChange={(e) => setRepairs(e.target.value)}
+        />
+
+        <input
+          placeholder="Average Sell Price"
+          value={averageSellPrice}
+          onChange={(e) => setAverageSellPrice(e.target.value)}
+        />
+      </div>
 
       <button onClick={addVehicle}>Add Vehicle</button>
 
@@ -105,35 +161,78 @@ export default function Home() {
 
       {vehicles.length === 0 && <p>No vehicles added yet.</p>}
 
-      {vehicles.map((car) => {
-        const total = Number(car.purchase_price) + Number(car.repair_cost)
-        const profit = Number(car.list_price) - total
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '16px',
+          marginTop: '20px',
+        }}
+      >
+        {vehicles.map((car) => {
+          const bidPriceValue = Number(car.purchase_price || 0)
+          const feesValue = Number(car.transport_cost || 0)
+          const repairValue = Number(car.repair_cost || 0)
+          const sellValue = Number(car.list_price || 0)
 
-        return (
-          <div
-            key={car.id}
-            style={{
-              marginBottom: '20px',
-              padding: '12px',
-              border: '1px solid #ccc',
-              borderRadius: '8px',
-              maxWidth: '400px',
-            }}
-          >
-            <strong>{car.vin}</strong>
-            <br />
-            Purchase: ${car.purchase_price}
-            <br />
-            Repairs: ${car.repair_cost}
-            <br />
-            Total Cost: ${total}
-            <br />
-            Estimated Sale Price: ${car.list_price}
-            <br />
-            Estimated Profit: ${profit}
-          </div>
-        )
-      })}
+          const totalCost = bidPriceValue + feesValue + repairValue
+          const profit = sellValue - totalCost
+
+          return (
+            <div
+              key={car.id}
+              style={{
+                padding: '16px',
+                border: '1px solid #ccc',
+                borderRadius: '12px',
+                background: '#f8f8f8',
+              }}
+            >
+              <h3 style={{ marginTop: 0 }}>
+                {car.year || ''} {car.make} {car.model}
+              </h3>
+
+              <p style={{ margin: '6px 0' }}>
+                <strong>VIN:</strong> {car.vin}
+              </p>
+
+              <p style={{ margin: '6px 0' }}>
+                <strong>Mileage:</strong> {car.mileage ?? 'N/A'}
+              </p>
+
+              <p style={{ margin: '6px 0' }}>
+                <strong>Bid Price:</strong> ${bidPriceValue}
+              </p>
+
+              <p style={{ margin: '6px 0' }}>
+                <strong>Fees:</strong> ${feesValue}
+              </p>
+
+              <p style={{ margin: '6px 0' }}>
+                <strong>Repair Cost:</strong> ${repairValue}
+              </p>
+
+              <p style={{ margin: '6px 0' }}>
+                <strong>Total Cost:</strong> ${totalCost}
+              </p>
+
+              <p style={{ margin: '6px 0' }}>
+                <strong>Average Sell Price:</strong> ${sellValue}
+              </p>
+
+              <p
+                style={{
+                  margin: '6px 0',
+                  fontWeight: 'bold',
+                  color: profit >= 0 ? 'green' : 'red',
+                }}
+              >
+                Profit: ${profit}
+              </p>
+            </div>
+          )
+        })}
+      </div>
     </main>
   )
 }
