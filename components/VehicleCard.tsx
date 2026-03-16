@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 type Vehicle = {
   id?: number
   vin: string
@@ -80,7 +82,16 @@ export default function VehicleCard({
           </div>
         </div>
 
-        <div className="flex shrink-0 gap-2">
+        <div className="flex flex-wrap gap-2">
+          {car.id && (
+            <Link
+              href={`/inventory/${car.id}`}
+              className="rounded-xl border border-blue-500/20 bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500"
+            >
+              Breakdown
+            </Link>
+          )}
+
           {onEdit && (
             <button
               onClick={() => onEdit(car)}
@@ -90,15 +101,15 @@ export default function VehicleCard({
             </button>
           )}
 
-          {car.id && onDelete && (
-            <button
-              onClick={() => onDelete(car.id!)}
-              disabled={deleting}
-              className="rounded-xl border border-red-500/20 bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {deleting ? 'Deleting...' : 'Delete'}
-            </button>
-          )}
+          {car.id != null && onDelete && (
+  <button
+    onClick={() => onDelete(car.id!)}
+    disabled={deleting}
+    className="rounded-xl border border-red-500/20 bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+  >
+    {deleting ? 'Deleting...' : 'Delete'}
+  </button>
+)}
         </div>
       </div>
 
