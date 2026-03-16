@@ -2,26 +2,24 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '../../utils/supabase/client'
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const supabase = createClient()
-  const router = useRouter()
 
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleResetRequest = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setMessage('')
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
     })
 
     setLoading(false)
@@ -31,8 +29,7 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/')
-    router.refresh()
+    setMessage('Password reset link sent. Check your email.')
   }
 
   return (
@@ -44,14 +41,14 @@ export default function LoginPage() {
               Auto Flipper
             </p>
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">
-              Log in
+              Reset password
             </h1>
             <p className="mt-2 text-sm text-slate-400">
-              Sign in to manage inventory, costs, and profit.
+              Enter your email and we’ll send you a reset link.
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleResetRequest} className="space-y-4">
             <div>
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                 Email
@@ -66,33 +63,15 @@ export default function LoginPage() {
               />
             </div>
 
-            <div>
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Password
-                </label>
-
-                <Link
-                  href="/forgot-password"
-                  className="text-xs font-semibold text-blue-400 hover:text-blue-300"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-
-              <input
-                type="password"
-                placeholder="Enter your password"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-slate-500"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
             {error && (
               <p className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
                 {error}
+              </p>
+            )}
+
+            {message && (
+              <p className="rounded-2xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-300">
+                {message}
               </p>
             )}
 
@@ -101,17 +80,17 @@ export default function LoginPage() {
               className="w-full rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-70"
               disabled={loading}
             >
-              {loading ? 'Logging in...' : 'Log in'}
+              {loading ? 'Sending...' : 'Send Reset Link'}
             </button>
           </form>
 
           <p className="mt-6 text-sm text-slate-400">
-            Don’t have an account?{' '}
+            Back to{' '}
             <Link
-              href="/sign-up"
+              href="/login"
               className="font-semibold text-blue-400 hover:text-blue-300"
             >
-              Sign up
+              Log in
             </Link>
           </p>
         </div>

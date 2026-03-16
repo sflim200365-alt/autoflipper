@@ -5,19 +5,17 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '../../utils/supabase/client'
 
-export default function SignUpPage() {
+export default function ResetPasswordPage() {
   const supabase = createClient()
   const router = useRouter()
 
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -35,14 +33,8 @@ export default function SignUpPage() {
       return
     }
 
-    const { error } = await supabase.auth.signUp({
-      email,
+    const { error } = await supabase.auth.updateUser({
       password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-      },
     })
 
     setLoading(false)
@@ -52,9 +44,12 @@ export default function SignUpPage() {
       return
     }
 
-    setMessage('Account created. Check your email if confirmation is enabled.')
-    router.push('/login')
-    router.refresh()
+    setMessage('Password updated successfully.')
+
+    setTimeout(() => {
+      router.push('/login')
+      router.refresh()
+    }, 1200)
   }
 
   return (
@@ -66,49 +61,21 @@ export default function SignUpPage() {
               Auto Flipper
             </p>
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">
-              Create account
+              Choose new password
             </h1>
             <p className="mt-2 text-sm text-slate-400">
-              Start tracking your inventory, costs, and profit in one place.
+              Enter your new password below.
             </p>
           </div>
 
-          <form onSubmit={handleSignUp} className="space-y-4">
+          <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                Name
-              </label>
-              <input
-                type="text"
-                placeholder="Enter your name"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-slate-500"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-slate-500"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                Password
+                New Password
               </label>
               <input
                 type="password"
-                placeholder="Create a password"
+                placeholder="Enter new password"
                 className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-slate-500"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -118,11 +85,11 @@ export default function SignUpPage() {
 
             <div>
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                Confirm Password
+                Confirm New Password
               </label>
               <input
                 type="password"
-                placeholder="Re-enter your password"
+                placeholder="Re-enter new password"
                 className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-slate-500"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -147,12 +114,12 @@ export default function SignUpPage() {
               className="w-full rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-70"
               disabled={loading}
             >
-              {loading ? 'Creating account...' : 'Create Account'}
+              {loading ? 'Updating...' : 'Update Password'}
             </button>
           </form>
 
           <p className="mt-6 text-sm text-slate-400">
-            Already have an account?{' '}
+            Back to{' '}
             <Link
               href="/login"
               className="font-semibold text-blue-400 hover:text-blue-300"
