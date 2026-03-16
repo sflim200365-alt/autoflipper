@@ -7,6 +7,7 @@ const navItems = [
   { href: '/', label: 'Dashboard' },
   { href: '/add-vehicle', label: 'Add Vehicle' },
   { href: '/inventory', label: 'Inventory' },
+  { href: '/bid-calculator', label: 'Bid Calculator' },
 ]
 
 export default function AppNav() {
@@ -14,7 +15,7 @@ export default function AppNav() {
 
   return (
     <nav className="mb-5 rounded-3xl border border-white/10 bg-slate-950/70 p-2 shadow-xl">
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {navItems.map((item) => {
           const active = pathname === item.href
 
